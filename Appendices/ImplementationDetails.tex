@@ -1,0 +1,73 @@
+\lhead{\emph{Implementation Details}}
+\chapter{Implementation Details} The implementation of the system is one of the work products that we targeted. To describe the construction we divided the implementation into the layers of logic, and where it applies in the system.  The model is represented on the node, during transmission, on the server, or in reporting.  
+At its base there is an object model that is used in both in memory and on disk.  The object model provides a consistent and organized view of all the configuration items and data items. For instance a node is a physical device that is deployed on a remote. When provisioned the node is added to the database as a configuration item{Bernard:2012vp}. The node is also initialized with the information unique to that node such as its id and the id of the server.  The database will them record a copy with additional attributes such as the date of creation of the node and its configuration.
+During transmission we focus on the message object. The message is the model that gets transmitted between systems.  Messages are transmitted using a webservice from the node to the server as the backhaul permits and are seamlessly captured and stored by the server. 
+Finally, on the server, we have processing, storing, and reporting functions that rely on the full model structure.  The configuration item data that stored during provisioning is matched against the data encrypted in the message. If the message is valid, it can be assumed that it has maintained confidentiality, integrity and authenticity. 
+
+\section{Object Model}
+The object model is designed to reflect the physical elements and relationships between objects. Instances of the objects are held in the memory and on the network as well as in storage. To allow for a logically seamless integration, we employ an Object Relational Mapper (ORM).  This abstracts the persistence of the object and fits well with the REST webservice.  Each class in the object model roughly corresponds to a RDBS table or set of tables. The ORM allows for flexibility in design for future implementations of the storage layer.  
+
+\subsection{Nodes}
+The fundamental object is the node. \autoref{fig:logicalModelNodes} It is a physical object that is also represented in the database.  Its configuration contains the encryption keys, X.509 certificates, and collection algorithms on the remote.  In our implementation the node is a low-power device that has connectivity to the backhaul (and then virtualized for testing).  The node is responsible for transmitting, queuing, securing, and collecting the event and message data.  
+\begin{figure}
+\centering
+\includegraphics[scale=.9]{Figures/"logical model diagram - node highlight"}
+\caption{logical model diagram - nodes}
+\label{fig:logicalModelNodes}
+\end{figure}
+
+\subsection{Tendrils}
+Attached to the nodes are tendrils. Tendril is our term for the data source being presented.  Tendrils handle inputs from a range of services. For example, a node can receive ASCII streams of data over TCP/IP, or over serial, or contact closure connections. The other major input type is SNMP (Simple Network Management Protocol) and UPnP message events such as temperature alarms from a network device. 
+
+\subsection{Messages And Events}
+\autoref{fig:logicalModelMessagesAndEvents}
+ \begin{figure}
+ \centering
+ \includegraphics[scale=.7]{Figures/"logical model diagram - messages and events"}
+ \caption{logical model diagram - messages and events}
+ \label{fig:logicalModelMessagesAndEvents}
+ \end{figure}
+
+\subsection{Customers and Sites}
+The term site refers to the physical location where a node or server is present. A remote site typically is a ship or an energy production vessel. They may change location continuously (as in the case of a ship) or be moored to a single location for months, like a production petroleum rig.  Site has a special consideration when it comes to position attributes (latitude and longitude).  Position can be considered one of many attributes delivered by the message.  However, do to the map reporting tool we extract position as the messages arrive.  To round out the object model we have a customer object with names and personnel details.
+\begin{figure}
+\centering
+\includegraphics[scale=.8]{Figures/"logical model diagram - customers and sites"}
+\caption{logical model diagram - customers and sites}
+\label{fig:logicalModelCustomersAndSites}
+\end{figure}
+ 
+Appendix Figure 3	Object Model – Customers and Sites	
+
+\subsection{Server}
+The server is the destination for all of the data.  It is designed to be in a datacenter or in a shorebase.  It keeps a catalog of all the keys and certificates assigned to nodes. As each node is provisioned, an X.509 certificate and a key is generated and stored on both the server and the node.  The server contains the CA certificate for the system. It is used for signing all of the node certificates.  
+\begin{figure}
+\centering
+\includegraphics[scale=.7]{Figures/"logical model diagram - server"}
+\caption{logical model diagram - server}
+\label{fig:logicalModelServers}
+\end{figure}
+Appendix Figure 4	Object Model Server
+
+\section{TLS / SSL Tool}
+\subsection{Installing OpenSSL}
+The TLS/SSL solution used is openssl\cite{Anonymous:DuAhrSbO}.  It has a deep feature set including current encryption and hashing algorithms.  
+The first step in building the system is to install the openssl development command line application and its libraries. This will also ensure that the dependencies are installed. On the Centos Linux system the ‘yum’ tool is used.  From the command line and as super-user ‘root’ run the following from the command line. \par
+
+\begin{lstlisting}
+yum install –y libyaml-devel, autoconf, gcc-c++,\
+ readline-devel, zlib-devel, libffi-devel,\
+ openssl-devel, automake, libtool, bison, sqlite-devel 
+\end{lstlisting}
+\par
+%\newpage
+Once this completes you can verify the installation. 
+\begin{lstlisting}
+[root@host root]# openssl
+OpenSSL> version
+OpenSSL 1.0.1e-fips 11 Feb 2013
+OpenSSL> 
+\end{lstlisting}
+
+OpenSSL version 1.0.1e is the latest at the time of this writing, however, any install should use the latest version generally available.  
+

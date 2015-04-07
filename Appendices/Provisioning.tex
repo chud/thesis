@@ -1,0 +1,15 @@
+\lhead{\emph{Provisioning}}
+\chapter{Provisioning}
+Provisioning of the system is performed at the install. The server needs to be created and installed with the base operating system and tools.  The server and nodes all must be initialized with certificates and keys, and certificate signing must be completed.  
+It is possible to add nodes after the first provisioning but a server is prerequisite in any installation.  Here we will go through the process of creating out server and node hosts, installing the application software, and its configuration.  Careful attention needs to be taken during provisioning as the many of the security properties are dependent upon it.
+
+\section{Certificate And Key Management}
+Once the application is installed and functional a series of keys and certificates need to be created. All of this is done on the server. The first step is to generate the root CA. This is required to sign the node certificates. Then the node key, certificate is generated, a signing requires created and the signing completed.  Finally the certificates are install on the server and node. 
+
+\subsection{Root Key Generation}
+There are a number of tools for generation of a key. For our purposes OpenSSL is a practical choice because of its rich feature set and ubiquity. The OpenSSL functions are accessed though the API using Ruby\cite{Anonymous:PuXCJCvx}. Ruby provides an operating system agnostic command line interface and allows for automation of some step via the GUI.
+\subsection{Root CA Certificate Creation}
+
+
+\subsection{Node Key Generation}
+\subsection{Node Certificate Creation}
